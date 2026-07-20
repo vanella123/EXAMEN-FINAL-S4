@@ -1,14 +1,21 @@
--- ============================================================
--- base.sql
--- Systeme de simulation d'operateur Mobile Money
--- Version 1
--- SGBD : SQLite
---
--- Principe : aucune donnee derivable n'est stockee (solde,
--- frais). Tout est recalcule a partir de 'operations' et
--- 'baremes_frais' (+ historique), pour eliminer tout risque
--- de desynchronisation.
--- ============================================================
+PRAGMA foreign_keys = OFF;
+
+DROP VIEW IF EXISTS v_gains_operateur;
+DROP VIEW IF EXISTS v_historique_client;
+DROP VIEW IF EXISTS v_solde_clients;
+DROP VIEW IF EXISTS v_mouvements;
+DROP VIEW IF EXISTS v_operations_frais;
+
+DROP TRIGGER IF EXISTS trg_archive_bareme_update;
+DROP TRIGGER IF EXISTS trg_archive_bareme_delete;
+
+DROP TABLE IF EXISTS operations;
+DROP TABLE IF EXISTS baremes_frais_historique;
+DROP TABLE IF EXISTS baremes_frais;
+DROP TABLE IF EXISTS clients;
+DROP TABLE IF EXISTS types_operation;
+DROP TABLE IF EXISTS administrateurs;
+DROP TABLE IF EXISTS prefixes;
 
 PRAGMA foreign_keys = ON;
 
