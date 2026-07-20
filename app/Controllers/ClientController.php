@@ -48,4 +48,5 @@ class ClientController extends BaseController
 
         return view('client/dashboard', $data);
     }
-}
+    
+} 
