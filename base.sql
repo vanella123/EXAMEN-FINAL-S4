@@ -162,7 +162,7 @@ SELECT
          WHERE h.id_type_operation = o.id_type_operation
            AND o.montant BETWEEN h.montant_min AND h.montant_max
            AND h.date_modif > o.date_operation
-         ORDER BY h.date_modif ASC
+         ORDER BY h.date_modif ASC 
          LIMIT 1),
         (SELECT b.frais FROM baremes_frais b
          WHERE b.id_type_operation = o.id_type_operation

@@ -95,60 +95,180 @@ class OperationService
         return ['success' => true, 'message' => 'Retrait effectué avec succès.'];
     }
 
-    public function effectuerTransfert(int $idClient, string $numeroDestinataire, float $montant): array
-    {
-        if ($montant <= 0) {
-            return ['success' => false, 'message' => 'Montant invalide.'];
-        }
+   public function effectuerTransfert(
+    int $idClient,
+    string $numeroDestinataire,
+    float $montant,
+    bool $retraitInclus
+): array
+{
 
-        $expediteur = $this->clientModel->find($idClient);
-        if (!$expediteur) {
-            return ['success' => false, 'message' => 'Expéditeur introuvable.'];
-        }
-
-        if ($expediteur['numero_telephone'] === $numeroDestinataire) {
-            return ['success' => false, 'message' => 'Le destinataire doit être différent de l\'expéditeur.'];
-        }
-
-        $destinataire = $this->clientModel->findByNumero($numeroDestinataire);
-        if (!$destinataire) {
-            $idDest = $this->clientModel->insert(['numero_telephone' => $numeroDestinataire]);
-            $destinataire = $this->clientModel->find($idDest);
-        }
-
-        $idType = $this->getIdTypeOperation('TRANSFERT');
-        if (!$idType) {
-            return ['success' => false, 'message' => 'Type TRANSFERT introuvable.'];
-        }
-
-        $frais = $this->baremeFraisModel->getFrais($idType, $montant);
-        $total = $montant + $frais;
-        $solde = $this->getSolde($idClient);
-
-        if ($solde < $total) {
-            return ['success' => false, 'message' => 'Solde insuffisant.'];
-        }
-
-        $this->db->transBegin();
-
-        try {
-            $this->operationModel->insert([
-                'id_client' => $idClient,
-                'id_client_destinataire' => $destinataire['id_client'],
-                'id_type_operation' => $idType,
-                'montant' => $montant
-            ]);
-
-            if ($this->db->transStatus() === false) {
-                $this->db->transRollback();
-                return ['success' => false, 'message' => 'Erreur lors du transfert.'];
-            }
-
-            $this->db->transCommit();
-            return ['success' => true, 'message' => 'Transfert effectué avec succès.'];
-        } catch (\Exception $e) {
-            $this->db->transRollback();
-            return ['success' => false, 'message' => 'Erreur lors du transfert.'];
-        }
+    if ($montant <= 0) {
+        return [
+            'success'=>false,
+            'message'=>'Montant invalide.'
+        ];
     }
+
+
+    $expediteur = $this->clientModel->find($idClient);
+
+
+    if (!$expediteur) {
+        return [
+            'success'=>false,
+            'message'=>'Expéditeur introuvable.'
+        ];
+    }
+
+
+    if ($expediteur['numero_telephone'] === $numeroDestinataire) {
+        return [
+            'success'=>false,
+            'message'=>'Impossible de transférer à soi-même.'
+        ];
+    }
+
+
+
+    // Trouver ou créer le destinataire
+    $destinataire = $this->clientModel
+                         ->findByNumero($numeroDestinataire);
+
+
+    if (!$destinataire) {
+
+        $idDest = $this->clientModel->insert([
+            'numero_telephone'=>$numeroDestinataire
+        ]);
+
+        $destinataire = $this->clientModel->find($idDest);
+    }
+
+
+
+    // Toujours TRANSFERT
+    $idTypeTransfert = $this->getIdTypeOperation('TRANSFERT');
+
+
+    if (!$idTypeTransfert) {
+
+        return [
+            'success'=>false,
+            'message'=>'Type transfert introuvable'
+        ];
+    }
+
+
+
+    /*
+        Montant qui sera enregistré dans operations
+    */
+    $montantOperation = $montant;
+
+
+
+    /*
+        Si retrait inclus :
+        on ajoute les frais retrait au montant reçu
+    */
+    if ($retraitInclus) {
+
+
+        $idTypeRetrait = $this->getIdTypeOperation('RETRAIT');
+
+
+        $fraisRetrait = $this->baremeFraisModel
+            ->getFrais(
+                $idTypeRetrait,
+                $montant
+            );
+
+
+        $montantOperation += $fraisRetrait;
+    }
+
+
+
+    /*
+        Vérification du solde
+    */
+
+    $fraisTransfert = $this->baremeFraisModel
+        ->getFrais(
+            $idTypeTransfert,
+            $montantOperation
+        );
+
+
+    $total = $montantOperation + $fraisTransfert;
+
+
+
+    $solde = $this->getSolde($idClient);
+
+
+    if ($solde < $total) {
+
+        return [
+            'success'=>false,
+            'message'=>'Solde insuffisant.'
+        ];
+    }
+
+
+
+    $this->db->transBegin();
+
+
+    try {
+
+
+        $this->operationModel->insert([
+
+            'id_client'=>$idClient,
+
+            'id_client_destinataire'
+                =>$destinataire['id_client'],
+
+            'id_type_operation'
+                =>$idTypeTransfert,
+
+            'montant'=>$montantOperation
+        ]);
+
+
+
+        if ($this->db->transStatus() === false) {
+
+            $this->db->transRollback();
+
+            return [
+                'success'=>false,
+                'message'=>'Erreur transfert'
+            ];
+        }
+
+
+        $this->db->transCommit();
+
+
+        return [
+            'success'=>true,
+            'message'=>'Transfert effectué avec succès'
+        ];
+
+
+    } catch(\Exception $e) {
+
+
+        $this->db->transRollback();
+
+
+        return [
+            'success'=>false,
+            'message'=>'Erreur transfert'
+        ];
+    }
+}
 }
