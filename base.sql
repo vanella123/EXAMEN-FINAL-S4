@@ -269,3 +269,6 @@ FROM v_operations_frais o
 JOIN types_operation t ON t.id_type_operation = o.id_type_operation
 WHERE t.frais_applicable = 1
 GROUP BY t.code;
+
+
+-- 0335489854
