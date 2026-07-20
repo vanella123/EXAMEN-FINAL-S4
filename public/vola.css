@@ -98,7 +98,7 @@ a {
 .navbar-vola .nav-link {
   color: rgba(255, 255, 255, 0.85) !important;
   font-weight: 500;
-  font-size: 0.94rem;
+  font-size: 0.75rem;
   padding: 0.5rem 0.9rem !important;
   border-radius: var(--radius-sm);
   transition: all 0.15s ease;

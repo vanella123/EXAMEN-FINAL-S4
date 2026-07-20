@@ -11,10 +11,23 @@ class PrefixModel extends Model
 
     protected $allowedFields = [
         'prefixe',
-        'actif'
+        'actif',
+        'id_operateur'
     ];
 
     protected $returnType = 'array';
+
+
+    /**
+     * Retourne tous les préfixes avec leur opérateur
+     */
+    public function getAvecOperateur()
+    {
+        return $this->select('prefixes.*, operateur.libelle AS operateur')
+                    ->join('operateur', 'operateur.id_operateur = prefixes.id_operateur')
+                    ->findAll();
+    }
+
 
     /**
      * Vérifie si un préfixe est actif
@@ -28,6 +41,7 @@ class PrefixModel extends Model
                     ->where('actif', 1)
                     ->first();
     }
+
 
     /**
      * Retourne tous les préfixes actifs

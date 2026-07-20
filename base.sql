@@ -9,6 +9,10 @@ DROP VIEW IF EXISTS v_operations_frais;
 DROP TRIGGER IF EXISTS trg_archive_bareme_update;
 DROP TRIGGER IF EXISTS trg_archive_bareme_delete;
 
+
+DROP TABLE IF EXISTS commission_operateur;
+DROP TABLE IF EXISTS operateur;
+DROP TABLE IF EXISTS prefixes;
 DROP TABLE IF EXISTS operations;
 DROP TABLE IF EXISTS baremes_frais_historique;
 DROP TABLE IF EXISTS baremes_frais;
@@ -22,7 +26,6 @@ PRAGMA foreign_keys = ON;
 
 --- Version 2
 -- TABLE OPERATEUR
-DROP TABLE IF EXISTS operateur;
 
 CREATE TABLE operateur (
     id_operateur INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +33,6 @@ CREATE TABLE operateur (
 );
 
 -- TABLE COMMISSION OPERATEUR
-DROP TABLE IF EXISTS commission_operateur;
 
 CREATE TABLE commission_operateur (
     id_commission_operateur INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,7 +44,6 @@ CREATE TABLE commission_operateur (
 );
 
 -- TABLE PREFIXES
-DROP TABLE IF EXISTS prefixes;
 
 CREATE TABLE prefixes (
     id_prefixe INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -152,9 +153,67 @@ CREATE INDEX idx_baremes_type ON baremes_frais(id_type_operation);
 -- DONNEES DE BASE
 
 INSERT INTO administrateurs (login, mot_de_passe) VALUES ('admin', 'password');
+-- DONNEES DE BASE
+-- OPERATEURS
 
-INSERT INTO prefixes (prefixe) VALUES ('033');
-INSERT INTO prefixes (prefixe) VALUES ('037');
+INSERT INTO operateur (libelle) VALUES ('TELMA');
+INSERT INTO operateur (libelle) VALUES ('ORANGE');
+INSERT INTO operateur (libelle) VALUES ('AIRTEL');
+
+
+-- COMMISSIONS OPERATEURS
+
+-- TELMA : 2%
+INSERT INTO commission_operateur 
+(id_operateur, pourcentage_commission)
+VALUES 
+(1, 2.00);
+
+-- ORANGE : 1.50%
+INSERT INTO commission_operateur 
+(id_operateur, pourcentage_commission)
+VALUES 
+(2, 1.50);
+
+-- AIRTEL : 1.75%
+INSERT INTO commission_operateur 
+(id_operateur, pourcentage_commission)
+VALUES 
+(3, 1.75);
+
+
+-- PREFIXES TELEPHONIQUES
+
+-- TELMA
+INSERT INTO prefixes 
+(prefixe, actif, id_operateur)
+VALUES 
+('034', 1, 1);
+
+INSERT INTO prefixes 
+(prefixe, actif, id_operateur)
+VALUES 
+('038', 1, 1);
+
+
+-- ORANGE
+INSERT INTO prefixes 
+(prefixe, actif, id_operateur)
+VALUES 
+('032', 1, 2);
+
+INSERT INTO prefixes 
+(prefixe, actif, id_operateur)
+VALUES 
+('037', 1, 2);
+
+
+-- AIRTEL
+INSERT INTO prefixes 
+(prefixe, actif, id_operateur)
+VALUES 
+('033', 1, 3);
+
 
 INSERT INTO types_operation (code, libelle, frais_applicable) VALUES ('DEPOT', 'Depot', 0);
 INSERT INTO types_operation (code, libelle, frais_applicable) VALUES ('RETRAIT', 'Retrait', 1);

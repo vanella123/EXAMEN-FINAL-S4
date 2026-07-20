@@ -24,11 +24,17 @@ class GainController extends BaseController
         $gainsRetrait = $this->statService->getTotalGainsRetrait();
         $gainsTransfert = $this->statService->getTotalGainsTransfert();
 
+        // V2: gains internes et externes
+        $gainsInternes = $this->statService->getGainsOperateurInterne();
+        $gainsExternes = $this->statService->getGainsAutresOperateurs();
+
         $data = [
             'gains' => $gains,
             'total_gains' => $totalGains,
             'gains_retrait' => $gainsRetrait,
-            'gains_transfert' => $gainsTransfert
+            'gains_transfert' => $gainsTransfert,
+            'gains_internes' => $gainsInternes,
+            'gains_externes' => $gainsExternes
         ];
 
         return view('admin/gains', $data);

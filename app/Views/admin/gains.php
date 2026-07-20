@@ -1,40 +1,7 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gains — Vola+</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
-  <link rel="stylesheet" href="<?=base_url('css/bootstrap/css/bootstrap.min.css')?>">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="<?= base_url('vola.css') ?>" rel="stylesheet">
-</head>
-<body>
+<?php $this->setVar('title', 'Gains') ?>
+<?php $this->setVar('currentPage', 'gains') ?>
+<?= $this->include('admin/layouts/admin_header') ?>
 
-  <nav class="navbar navbar-expand-lg navbar-vola" data-bs-theme="dark">
-    <div class="container">
-      <a class="navbar-brand" href="<?= base_url('admin/dashboard') ?>"><i class="bi bi-wallet2"></i> Vola+ <span class="fw-normal fs-6 ms-1 opacity-75">Opérateur</span></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navAdmin">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navAdmin">
-        <ul class="navbar-nav mx-lg-auto gap-lg-1">
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/dashboard') ?>"><i class="bi bi-speedometer2"></i> Tableau de bord</a></li>
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/prefixes') ?>"><i class="bi bi-sim"></i> Préfixes</a></li>
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/types-operations') ?>"><i class="bi bi-tags"></i> Types d'opérations</a></li>
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/baremes') ?>"><i class="bi bi-percent"></i> Barèmes</a></li>
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('admin/comptes') ?>"><i class="bi bi-people"></i> Comptes</a></li>
-          <li class="nav-item"><a class="nav-link active" href="<?= base_url('admin/gains') ?>"><i class="bi bi-graph-up-arrow"></i> Gains</a></li>
-        </ul>
-        <a href="<?= base_url('admin/logout') ?>" class="btn btn-logout mt-3 mt-lg-0"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
-      </div>
-    </div>
-  </nav>
-
-  <main>
-    <div class="container">
       <div class="page-header">
         <span class="text-eyebrow">Suivi financier</span>
         <h1>Situation des gains</h1>
@@ -117,12 +84,86 @@
           </table>
         </div>
       </div>
-    </div>
-  </main>
 
-  <footer class="footer-vola"><div class="container"><div class="row gy-4"><div class="col-lg-4"><div class="footer-brand"><i class="bi bi-wallet2"></i> Vola+</div><p class="mt-3 small">Le porte-monnaie mobile qui simplifie vos dépôts, retraits et transferts, partout à Madagascar.</p></div><div class="col-lg-2 col-6"><h6>Client</h6><a href="<?= base_url('login') ?>" class="d-block">Connexion</a><a href="<?= base_url('client/dashboard') ?>" class="d-block">Tableau de bord</a></div><div class="col-lg-2 col-6"><h6>Opérateur</h6><a href="<?= base_url('admin/dashboard') ?>" class="d-block">Statistiques</a><a href="<?= base_url('admin/baremes') ?>" class="d-block">Barèmes</a><a href="<?= base_url('admin/comptes') ?>" class="d-block">Comptes</a></div><div class="col-lg-4"><h6>Assistance</h6><p class="small mb-1"><i class="bi bi-telephone"></i> 034 00 000 00</p><p class="small mb-1"><i class="bi bi-envelope"></i> contact@volaplus.mg</p></div></div><hr><div class="d-flex flex-column flex-md-row justify-content-between footer-bottom"><span>&copy; 2026 Vola+. Projet pédagogique — simulateur mobile money.</span><span>Fait avec <i class="bi bi-heart-fill text-gold"></i> à Madagascar</span></div></div></footer>
+      <!-- ============================================================ -->
+      <!-- A) SITUATION DES GAINS DE MON OPERATEUR (INTERNE) -->
+      <!-- ============================================================ -->
+      <div class="mt-5">
+        <h4 class="mb-1">A) Situation des gains de mon opérateur</h4>
+        <p class="text-secondary mb-3">Opérations internes (même opérateur).</p>
+      </div>
 
-  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> -->
-  <script src="<?= base_url('css/bootstrap/js/bootstrap.bundle.min.js')?>"></script>
-</body>
-</html>
+      <div class="table-card mb-5">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Opérateur</th>
+                <th>Type opération</th>
+                <th>Nombre opérations</th>
+                <th>Total frais</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php if(empty($gains_internes)): ?>
+                <tr><td colspan="4" class="text-center">Aucune opération interne.</td></tr>
+              <?php else: ?>
+                <?php foreach($gains_internes as $gi): ?>
+                <tr>
+                  <td class="fw-semibold"><?= esc($gi['operateur']) ?></td>
+                  <td>
+                    <?php $badge = $gi['type_operation'] === 'RETRAIT' ? 'badge-retrait' : 'badge-transfert'; ?>
+                    <span class="badge-op <?= $badge ?>"><?= esc($gi['type_operation']) ?></span>
+                  </td>
+                  <td><?= number_format((int)$gi['nombre_operations'], 0, ' ', ' ') ?></td>
+                  <td class="fw-semibold text-vola"><?= number_format((float)$gi['total_frais'], 0, ' ', ' ') ?> Ar</td>
+                </tr>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================================ -->
+      <!-- B) SITUATION DES GAINS AVEC LES AUTRES OPERATEURS -->
+      <!-- ============================================================ -->
+      <div class="mt-5">
+        <h4 class="mb-1">B) Situation des gains avec les autres opérateurs</h4>
+        <p class="text-secondary mb-3">Transferts entre opérateurs différents (inter-opérateur).</p>
+      </div>
+
+      <div class="table-card mb-5">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Opérateur source</th>
+                <th>Opérateur destinataire</th>
+                <th>Nombre transferts</th>
+                <th>Montant total transféré</th>
+                <th>Commission %</th>
+                <th>Commission gagnée</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php if(empty($gains_externes)): ?>
+                <tr><td colspan="6" class="text-center">Aucun transfert externe.</td></tr>
+              <?php else: ?>
+                <?php foreach($gains_externes as $ge): ?>
+                <tr>
+                  <td class="fw-semibold"><?= esc($ge['operateur_source']) ?></td>
+                  <td class="fw-semibold"><?= esc($ge['operateur_destinataire']) ?></td>
+                  <td><?= number_format((int)$ge['nombre_transferts'], 0, ' ', ' ') ?></td>
+                  <td><?= number_format((float)$ge['montant_total'], 0, ' ', ' ') ?> Ar</td>
+                  <td><?= number_format((float)$ge['pourcentage_commission'], 2) ?> %</td>
+                  <td class="fw-semibold text-vola"><?= number_format((float)$ge['total_commission'], 0, ' ', ' ') ?> Ar</td>
+                </tr>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+<?= $this->include('admin/layouts/admin_footer') ?>

@@ -19,6 +19,7 @@ $routes->post('/retrait/save', 'OperationController::saveRetrait');
 
 $routes->get('/transfert', 'TransfertController::index');
 $routes->post('/transfert/save', 'TransfertController::save');
+$routes->post('/transfert/save-multiple', 'TransfertController::saveMultiple');
 
 $routes->get('/historique', 'HistoriqueController::index');
 
@@ -47,3 +48,25 @@ $routes->get('/admin/baremes/delete/(:num)', 'BaremeController::delete/$1');
 $routes->get('/admin/comptes', 'CompteController::index');
 
 $routes->get('/admin/gains', 'GainController::index');
+
+$routes->get(
+    'admin/commissions',
+    'CommissionOperateurController::index'
+);
+
+$routes->post(
+    'admin/commissions/create',
+    'CommissionOperateurController::create'
+);
+
+$routes->post(
+    'admin/commissions/update',
+    'CommissionOperateurController::update'
+);
+
+$routes->get(
+    'admin/commissions/delete/(:num)',
+    'CommissionOperateurController::delete/$1'
+);
+
+$routes->get('/admin/montants', 'MontantController::index');

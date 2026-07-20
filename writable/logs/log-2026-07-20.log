@@ -63,3 +63,59 @@ in SYSTEMPATH/Database/SQLite3/Connection.php on line 164.
 13 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
 14 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
 15 SYSTEMPATH/rewrite.php(44): require_once('/home/faneva/L2/S4/SI/exam_final/EXAMEN-FINAL-S4/public/index.php')
+CRITICAL - 2026-07-20 13:32:14 --> Error: Object of class CodeIgniter\View\View could not be converted to string
+[Method: GET, Route: admin/commissions]
+in APPPATH/Views/admin/commissions.php on line 1.
+ 1 SYSTEMPATH/View/View.php(240): include()
+ 2 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
+ 4 APPPATH/Controllers/CommissionOperateurController.php(46): view()
+ 5 SYSTEMPATH/CodeIgniter.php(951): App\Controllers\CommissionOperateurController->index()
+ 6 SYSTEMPATH/CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController()
+ 7 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest()
+ 8 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+11 SYSTEMPATH/rewrite.php(44): require_once('/home/faneva/L2/S4/SI/exam_final/EXAMEN-FINAL-S4/public/index.php')
+CRITICAL - 2026-07-20 13:32:30 --> Error: Object of class CodeIgniter\View\View could not be converted to string
+[Method: GET, Route: admin/dashboard]
+in APPPATH/Views/admin/dashboard.php on line 1.
+ 1 SYSTEMPATH/View/View.php(240): include()
+ 2 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
+ 4 APPPATH/Controllers/AdminDashboardController.php(32): view()
+ 5 SYSTEMPATH/CodeIgniter.php(951): App\Controllers\AdminDashboardController->index()
+ 6 SYSTEMPATH/CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController()
+ 7 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest()
+ 8 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+11 SYSTEMPATH/rewrite.php(44): require_once('/home/faneva/L2/S4/SI/exam_final/EXAMEN-FINAL-S4/public/index.php')
+CRITICAL - 2026-07-20 13:33:54 --> Error: Object of class CodeIgniter\View\View could not be converted to string
+[Method: GET, Route: admin/dashboard]
+in APPPATH/Views/admin/dashboard.php on line 1.
+ 1 SYSTEMPATH/View/View.php(240): include()
+ 2 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
+ 4 APPPATH/Controllers/AdminDashboardController.php(32): view()
+ 5 SYSTEMPATH/CodeIgniter.php(951): App\Controllers\AdminDashboardController->index()
+ 6 SYSTEMPATH/CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController()
+ 7 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest()
+ 8 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+11 SYSTEMPATH/rewrite.php(44): require_once('/home/faneva/L2/S4/SI/exam_final/EXAMEN-FINAL-S4/public/index.php')
+CRITICAL - 2026-07-20 13:42:46 --> Error: Object of class CodeIgniter\View\View could not be converted to string
+[Method: GET, Route: admin/prefixes]
+in APPPATH/Views/admin/prefixes.php on line 1.
+ 1 SYSTEMPATH/View/View.php(240): include()
+ 2 SYSTEMPATH/View/View.php(243): CodeIgniter\View\View->CodeIgniter\View\{closure}()
+ 3 SYSTEMPATH/Common.php(1250): CodeIgniter\View\View->render()
+ 4 APPPATH/Controllers/PrefixeController.php(41): view()
+ 5 SYSTEMPATH/CodeIgniter.php(951): App\Controllers\PrefixeController->index()
+ 6 SYSTEMPATH/CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController()
+ 7 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest()
+ 8 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
+10 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+11 SYSTEMPATH/rewrite.php(44): require_once('/home/faneva/L2/S4/SI/exam_final/EXAMEN-FINAL-S4/public/index.php')
