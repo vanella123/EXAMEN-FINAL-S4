@@ -19,13 +19,40 @@ DROP TABLE IF EXISTS prefixes;
 
 PRAGMA foreign_keys = ON;
 
--- 1. PREFIXES
+
+--- Version 2
+-- TABLE OPERATEUR
+DROP TABLE IF EXISTS operateur;
+
+CREATE TABLE operateur (
+    id_operateur INTEGER PRIMARY KEY AUTOINCREMENT,
+    libelle VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- TABLE COMMISSION OPERATEUR
+DROP TABLE IF EXISTS commission_operateur;
+
+CREATE TABLE commission_operateur (
+    id_commission_operateur INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_operateur INTEGER NOT NULL,
+    pourcentage_commission DECIMAL(5,2) NOT NULL,
+
+    FOREIGN KEY (id_operateur)
+        REFERENCES operateur(id_operateur)
+);
+
+-- TABLE PREFIXES
 DROP TABLE IF EXISTS prefixes;
+
 CREATE TABLE prefixes (
-    id_prefixe    INTEGER PRIMARY KEY AUTOINCREMENT,
-    prefixe       VARCHAR(3)  NOT NULL UNIQUE,
-    actif         INTEGER     NOT NULL DEFAULT 1,
-    date_creation DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id_prefixe INTEGER PRIMARY KEY AUTOINCREMENT,
+    prefixe VARCHAR(3) NOT NULL UNIQUE,
+    actif INTEGER NOT NULL DEFAULT 1,
+    date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_operateur INTEGER NOT NULL,
+
+    FOREIGN KEY (id_operateur)
+        REFERENCES operateur(id_operateur)
 );
 
 -- 2. ADMINISTRATEURS
@@ -231,3 +258,4 @@ FROM v_operations_frais o
 JOIN types_operation t ON t.id_type_operation = o.id_type_operation
 WHERE t.frais_applicable = 1
 GROUP BY t.code;
+
