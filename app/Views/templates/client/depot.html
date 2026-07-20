@@ -8,27 +8,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="<?= base_url('vola.css') ?>" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
 </head>
 <body>
 
   <nav class="navbar navbar-expand-lg navbar-vola" data-bs-theme="dark">
     <div class="container">
-      <a class="navbar-brand" href="<?= base_url('client/dashboard') ?>"><i class="bi bi-wallet2"></i> Vola+</a>
+      <a class="navbar-brand" href="client-dashboard.html"><i class="bi bi-wallet2"></i> Vola+</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navClient">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navClient">
         <ul class="navbar-nav mx-lg-auto gap-lg-1">
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('client/dashboard') ?>"><i class="bi bi-house-door"></i> Tableau de bord</a></li>
-          <li class="nav-item"><a class="nav-link active" href="<?= base_url('depot') ?>"><i class="bi bi-arrow-down-circle"></i> Dépôt</a></li>
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('retrait') ?>"><i class="bi bi-arrow-up-circle"></i> Retrait</a></li>
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('transfert') ?>"><i class="bi bi-send"></i> Transfert</a></li>
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('historique') ?>"><i class="bi bi-clock-history"></i> Historique</a></li>
+          <li class="nav-item"><a class="nav-link" href="client-dashboard.html"><i class="bi bi-house-door"></i> Tableau de bord</a></li>
+          <li class="nav-item"><a class="nav-link active" href="depot.html"><i class="bi bi-arrow-down-circle"></i> Dépôt</a></li>
+          <li class="nav-item"><a class="nav-link" href="retrait.html"><i class="bi bi-arrow-up-circle"></i> Retrait</a></li>
+          <li class="nav-item"><a class="nav-link" href="transfert.html"><i class="bi bi-send"></i> Transfert</a></li>
+          <li class="nav-item"><a class="nav-link" href="historique.html"><i class="bi bi-clock-history"></i> Historique</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-          <span class="phone-chip"><i class="bi bi-telephone-fill"></i> <?= esc($numero) ?></span>
-          <a href="<?= base_url('logout') ?>" class="btn btn-logout"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+          <span class="phone-chip"><i class="bi bi-telephone-fill"></i> 034 12 345 67</span>
+          <a href="client-login.html" class="btn btn-logout"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
         </div>
       </div>
     </div>
@@ -42,28 +42,35 @@
         <p>Le montant sera crédité immédiatement sur votre compte.</p>
       </div>
 
-      <?php if(session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
-      <?php endif; ?>
-
       <div class="form-card mb-5">
         <div class="card">
           <div class="card-body p-4 p-md-5">
-            <form action="<?= base_url('depot/save') ?>" method="post">
-              <?= csrf_field() ?>
+            <form action="#" method="post">
               <div class="mb-3">
                 <label class="form-label">Numéro de compte</label>
                 <div class="input-group">
                   <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
-                  <input type="tel" class="form-control" value="<?= esc($numero) ?>" readonly>
+                  <input type="tel" class="form-control" value="034 12 345 67" readonly>
                 </div>
               </div>
 
               <div class="mb-4">
-                <label for="montant" class="form-label">Montant à déposer</label>
+                <label for="montantDepot" class="form-label">Montant à déposer</label>
                 <div class="input-group">
                   <span class="input-group-text">Ar</span>
-                  <input type="number" min="1" step="any" class="form-control" id="montant" name="montant" placeholder="Ex: 50000" required>
+                  <input type="number" min="500" step="500" class="form-control" id="montantDepot" name="montant" placeholder="Ex: 50000" required>
+                </div>
+                <div class="form-text">Montant minimum 500 Ar. Le dépôt est traité automatiquement.</div>
+              </div>
+
+              <div class="recap-card mb-4">
+                <div class="recap-row">
+                  <span class="text-secondary">Frais de dépôt</span>
+                  <span class="fw-semibold text-vola">0 Ar</span>
+                </div>
+                <div class="recap-row total">
+                  <span>Total crédité</span>
+                  <span>—</span>
                 </div>
               </div>
 
@@ -86,9 +93,15 @@
         </div>
         <div class="col-lg-2 col-6">
           <h6>Client</h6>
-          <a href="<?= base_url('login') ?>" class="d-block">Connexion</a>
-          <a href="<?= base_url('client/dashboard') ?>" class="d-block">Tableau de bord</a>
-          <a href="<?= base_url('historique') ?>" class="d-block">Historique</a>
+          <a href="client-login.html" class="d-block">Connexion</a>
+          <a href="client-dashboard.html" class="d-block">Tableau de bord</a>
+          <a href="historique.html" class="d-block">Historique</a>
+        </div>
+        <div class="col-lg-2 col-6">
+          <h6>Opérateur</h6>
+          <a href="admin-dashboard.html" class="d-block">Statistiques</a>
+          <a href="baremes.html" class="d-block">Barèmes</a>
+          <a href="comptes.html" class="d-block">Comptes</a>
         </div>
         <div class="col-lg-4">
           <h6>Assistance</h6>

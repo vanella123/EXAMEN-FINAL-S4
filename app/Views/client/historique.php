@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dépôt — Vola+</title>
+  <title>Historique — Vola+</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,10 +21,10 @@
       <div class="collapse navbar-collapse" id="navClient">
         <ul class="navbar-nav mx-lg-auto gap-lg-1">
           <li class="nav-item"><a class="nav-link" href="<?= base_url('client/dashboard') ?>"><i class="bi bi-house-door"></i> Tableau de bord</a></li>
-          <li class="nav-item"><a class="nav-link active" href="<?= base_url('depot') ?>"><i class="bi bi-arrow-down-circle"></i> Dépôt</a></li>
+          <li class="nav-item"><a class="nav-link" href="<?= base_url('depot') ?>"><i class="bi bi-arrow-down-circle"></i> Dépôt</a></li>
           <li class="nav-item"><a class="nav-link" href="<?= base_url('retrait') ?>"><i class="bi bi-arrow-up-circle"></i> Retrait</a></li>
           <li class="nav-item"><a class="nav-link" href="<?= base_url('transfert') ?>"><i class="bi bi-send"></i> Transfert</a></li>
-          <li class="nav-item"><a class="nav-link" href="<?= base_url('historique') ?>"><i class="bi bi-clock-history"></i> Historique</a></li>
+          <li class="nav-item"><a class="nav-link active" href="<?= base_url('historique') ?>"><i class="bi bi-clock-history"></i> Historique</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
           <span class="phone-chip"><i class="bi bi-telephone-fill"></i> <?= esc($numero) ?></span>
@@ -36,44 +36,49 @@
 
   <main>
     <div class="container">
-      <div class="page-header text-center">
-        <span class="text-eyebrow">Opération</span>
-        <h1>Faire un dépôt</h1>
-        <p>Le montant sera crédité immédiatement sur votre compte.</p>
+      <div class="page-header">
+        <span class="text-eyebrow">Suivi</span>
+        <h1>Historique des opérations</h1>
+        <p>Toutes vos opérations effectuées sur votre compte Vola+.</p>
       </div>
 
-      <?php if(session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger"><?= session()->getFlashdata('error') ?></div>
-      <?php endif; ?>
+      <?php if(empty($operations)): ?>
+      <div class="alert alert-info">Aucune opération trouvée.</div>
+      <?php else: ?>
 
-      <div class="form-card mb-5">
-        <div class="card">
-          <div class="card-body p-4 p-md-5">
-            <form action="<?= base_url('depot/save') ?>" method="post">
-              <?= csrf_field() ?>
-              <div class="mb-3">
-                <label class="form-label">Numéro de compte</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
-                  <input type="tel" class="form-control" value="<?= esc($numero) ?>" readonly>
-                </div>
-              </div>
-
-              <div class="mb-4">
-                <label for="montant" class="form-label">Montant à déposer</label>
-                <div class="input-group">
-                  <span class="input-group-text">Ar</span>
-                  <input type="number" min="1" step="any" class="form-control" id="montant" name="montant" placeholder="Ex: 50000" required>
-                </div>
-              </div>
-
-              <button type="submit" class="btn btn-vola-primary w-100">
-                <i class="bi bi-check2-circle me-1"></i> Confirmer le dépôt
-              </button>
-            </form>
-          </div>
+      <div class="table-card mb-5">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Montant</th>
+                <th>Solde après</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach($operations as $ligne): ?>
+              <tr>
+                <td><?= esc($ligne['date_operation']) ?></td>
+                <td>
+                  <?php $badgeClass = match($ligne['type_operation']) {
+                    'Dépôt', 'Depot' => 'badge-depot',
+                    'Retrait' => 'badge-retrait',
+                    default => 'badge-transfert'
+                  }; ?>
+                  <span class="badge-op <?= $badgeClass ?>"><?= esc($ligne['type_operation']) ?></span>
+                </td>
+                <td><?= number_format((float)$ligne['montant_mouvement'], 0, ' ', ' ') ?> Ar</td>
+                <td><?= number_format((float)$ligne['solde_apres'], 0, ' ', ' ') ?> Ar</td>
+              </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
         </div>
       </div>
+      <?php endif; ?>
+
     </div>
   </main>
 
