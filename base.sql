@@ -124,7 +124,7 @@ CREATE INDEX idx_baremes_type ON baremes_frais(id_type_operation);
 
 -- DONNEES DE BASE
 
-INSERT INTO administrateurs (login, mot_de_passe) VALUES ('admin', 'CHANGE_ME_HASH');
+INSERT INTO administrateurs (login, mot_de_passe) VALUES ('admin', 'password');
 
 INSERT INTO prefixes (prefixe) VALUES ('033');
 INSERT INTO prefixes (prefixe) VALUES ('037');
