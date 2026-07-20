@@ -38,6 +38,13 @@
 # database.default.DBPrefix =
 # database.default.port = 3306
 
+#--------------------------------------------------------------------
+# DATABASE
+#--------------------------------------------------------------------
+
+ database.default.database = writable/mobile_money.db
+ database.default.DBDriver = SQLite3
+
 # If you use MySQLi as tests, first update the values of Config\Database::$tests.
 # database.tests.hostname = localhost
 # database.tests.database = ci4_test

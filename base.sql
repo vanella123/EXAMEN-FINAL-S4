@@ -1,0 +1,271 @@
+-- ============================================================
+-- base.sql
+-- Systeme de simulation d'operateur Mobile Money
+-- Version 1
+-- SGBD : SQLite
+--
+-- Principe : aucune donnee derivable n'est stockee (solde,
+-- frais). Tout est recalcule a partir de 'operations' et
+-- 'baremes_frais' (+ historique), pour eliminer tout risque
+-- de desynchronisation.
+-- ============================================================
+
+PRAGMA foreign_keys = ON;
+
+-- ------------------------------------------------------------
+-- 1. PREFIXES
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS prefixes;
+CREATE TABLE prefixes (
+    id_prefixe    INTEGER PRIMARY KEY AUTOINCREMENT,
+    prefixe       VARCHAR(3)  NOT NULL UNIQUE,
+    actif         INTEGER     NOT NULL DEFAULT 1,
+    date_creation DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ------------------------------------------------------------
+-- 2. ADMINISTRATEURS
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS administrateurs;
+CREATE TABLE administrateurs (
+    id_admin      INTEGER PRIMARY KEY AUTOINCREMENT,
+    login         VARCHAR(50)  NOT NULL UNIQUE,
+    mot_de_passe  VARCHAR(255) NOT NULL,
+    date_creation DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ------------------------------------------------------------
+-- 3. TYPES_OPERATION
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS types_operation;
+CREATE TABLE types_operation (
+    id_type_operation INTEGER PRIMARY KEY AUTOINCREMENT,
+    code              VARCHAR(20) NOT NULL UNIQUE, -- DEPOT, RETRAIT, TRANSFERT
+    libelle           VARCHAR(50) NOT NULL,
+    frais_applicable  INTEGER     NOT NULL DEFAULT 1
+);
+
+-- ------------------------------------------------------------
+-- 4. BAREMES_FRAIS (version active)
+-- AUCUNE colonne de date ici. C'est baremes_frais_historique qui
+-- porte la notion de temps (date_modif = date a laquelle une
+-- ancienne version a ete remplacee). Si aucune version archivee
+-- ne "couvre" la date d'une operation, c'est cette table (l'etat
+-- courant) qui s'applique.
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS baremes_frais;
+CREATE TABLE baremes_frais (
+    id_bareme         INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_type_operation INTEGER NOT NULL,
+    montant_min       DECIMAL(12,2) NOT NULL,
+    montant_max       DECIMAL(12,2) NOT NULL,
+    frais             DECIMAL(12,2) NOT NULL,
+    FOREIGN KEY (id_type_operation) REFERENCES types_operation(id_type_operation)
+        ON DELETE CASCADE
+);
+
+-- ------------------------------------------------------------
+-- 5. BAREMES_FRAIS_HISTORIQUE
+-- Recoit automatiquement (via trigger) l'ancienne version d'une
+-- ligne de baremes_frais des qu'elle est modifiee (UPDATE) ou
+-- supprimee (DELETE), avec la date a laquelle elle a cesse
+-- d'etre valide (date_modif).
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS baremes_frais_historique;
+CREATE TABLE baremes_frais_historique (
+    id_bareme_historique INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_bareme_origine    INTEGER NOT NULL,
+    id_type_operation    INTEGER NOT NULL,
+    montant_min          DECIMAL(12,2) NOT NULL,
+    montant_max          DECIMAL(12,2) NOT NULL,
+    frais                DECIMAL(12,2) NOT NULL,
+    date_modif            DATETIME NOT NULL,
+    FOREIGN KEY (id_type_operation) REFERENCES types_operation(id_type_operation)
+);
+
+-- Archive automatiquement l'ancienne valeur avant toute modification.
+-- Sans date_debut a maintenir sur la table active, UPDATE redevient
+-- sans risque : le trigger capture juste l'etat OLD avec l'instant
+-- present comme date_modif.
+DROP TRIGGER IF EXISTS trg_archive_bareme_update;
+CREATE TRIGGER trg_archive_bareme_update
+BEFORE UPDATE ON baremes_frais
+BEGIN
+    INSERT INTO baremes_frais_historique
+        (id_bareme_origine, id_type_operation, montant_min, montant_max, frais, date_modif)
+    VALUES
+        (OLD.id_bareme, OLD.id_type_operation, OLD.montant_min, OLD.montant_max, OLD.frais, STRFTIME('%Y-%m-%d %H:%M:%f','now'));
+END;
+
+-- Archive automatiquement avant toute suppression
+DROP TRIGGER IF EXISTS trg_archive_bareme_delete;
+CREATE TRIGGER trg_archive_bareme_delete
+BEFORE DELETE ON baremes_frais
+BEGIN
+    INSERT INTO baremes_frais_historique
+        (id_bareme_origine, id_type_operation, montant_min, montant_max, frais, date_modif)
+    VALUES
+        (OLD.id_bareme, OLD.id_type_operation, OLD.montant_min, OLD.montant_max, OLD.frais, STRFTIME('%Y-%m-%d %H:%M:%f','now'));
+END;
+
+-- ------------------------------------------------------------
+-- 6. CLIENTS
+-- PAS de colonne solde : calcule via la vue v_solde_clients
+-- a partir de 'operations'. Zero risque de desynchronisation.
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS clients;
+CREATE TABLE clients (
+    id_client        INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero_telephone VARCHAR(15) NOT NULL UNIQUE,
+    date_creation    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ------------------------------------------------------------
+-- 7. OPERATIONS
+-- PAS de colonne frais ni solde_avant/solde_apres : tout est
+-- recalcule via les vues (v_operations_frais, v_historique_client).
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS operations;
+CREATE TABLE operations (
+    id_operation           INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_client               INTEGER NOT NULL,           -- client qui initie l'operation
+    id_client_destinataire  INTEGER,                    -- rempli uniquement pour un transfert
+    id_type_operation       INTEGER NOT NULL,
+    montant                 DECIMAL(12,2) NOT NULL,
+    date_operation           DATETIME NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f','now')),
+    FOREIGN KEY (id_client) REFERENCES clients(id_client),
+    FOREIGN KEY (id_client_destinataire) REFERENCES clients(id_client),
+    FOREIGN KEY (id_type_operation) REFERENCES types_operation(id_type_operation)
+);
+
+-- ============================================================
+-- INDEXES
+-- ============================================================
+CREATE INDEX idx_operations_client ON operations(id_client);
+CREATE INDEX idx_operations_destinataire ON operations(id_client_destinataire);
+CREATE INDEX idx_operations_type ON operations(id_type_operation);
+CREATE INDEX idx_baremes_type ON baremes_frais(id_type_operation);
+
+-- ============================================================
+-- DONNEES DE BASE
+-- ============================================================
+
+INSERT INTO administrateurs (login, mot_de_passe) VALUES ('admin', 'CHANGE_ME_HASH');
+
+INSERT INTO prefixes (prefixe) VALUES ('033');
+INSERT INTO prefixes (prefixe) VALUES ('037');
+
+INSERT INTO types_operation (code, libelle, frais_applicable) VALUES ('DEPOT', 'Depot', 0);
+INSERT INTO types_operation (code, libelle, frais_applicable) VALUES ('RETRAIT', 'Retrait', 1);
+INSERT INTO types_operation (code, libelle, frais_applicable) VALUES ('TRANSFERT', 'Transfert', 1);
+
+-- Bareme RETRAIT (id_type_operation = 2)
+INSERT INTO baremes_frais (id_type_operation, montant_min, montant_max, frais) VALUES (2, 100, 5000, 100);
+INSERT INTO baremes_frais (id_type_operation, montant_min, montant_max, frais) VALUES (2, 5001, 15000, 300);
+INSERT INTO baremes_frais (id_type_operation, montant_min, montant_max, frais) VALUES (2, 15001, 50000, 700);
+
+-- Bareme TRANSFERT (id_type_operation = 3)
+INSERT INTO baremes_frais (id_type_operation, montant_min, montant_max, frais) VALUES (3, 100, 5000, 50);
+INSERT INTO baremes_frais (id_type_operation, montant_min, montant_max, frais) VALUES (3, 5001, 15000, 150);
+INSERT INTO baremes_frais (id_type_operation, montant_min, montant_max, frais) VALUES (3, 15001, 50000, 400);
+
+INSERT INTO clients (numero_telephone) VALUES ('0331234567');
+INSERT INTO clients (numero_telephone) VALUES ('0377654321');
+
+-- ============================================================
+-- VUES
+-- ============================================================
+
+-- Operations enrichies avec le frais applicable :
+-- 1) on cherche d'abord dans l'historique une version qui a ete
+--    remplacee (date_modif) APRES la date de l'operation -> c'est
+--    elle qui etait active au moment de l'operation (la plus proche
+--    dans le temps, via ORDER BY + LIMIT 1)
+-- 2) si aucune trouvee, la version courante (baremes_frais) s'applique
+DROP VIEW IF EXISTS v_operations_frais;
+CREATE VIEW v_operations_frais AS
+SELECT 
+    o.id_operation,
+    o.id_client,
+    o.id_client_destinataire,
+    o.id_type_operation,
+    o.montant,
+    o.date_operation,
+    COALESCE(
+        (SELECT h.frais FROM baremes_frais_historique h
+         WHERE h.id_type_operation = o.id_type_operation
+           AND o.montant BETWEEN h.montant_min AND h.montant_max
+           AND h.date_modif > o.date_operation
+         ORDER BY h.date_modif ASC
+         LIMIT 1),
+        (SELECT b.frais FROM baremes_frais b
+         WHERE b.id_type_operation = o.id_type_operation
+           AND o.montant BETWEEN b.montant_min AND b.montant_max
+         LIMIT 1),
+        0
+    ) AS frais
+FROM operations o;
+
+-- Mouvements individuels par client (une operation peut generer
+-- 2 mouvements : un pour l'emetteur, un pour le destinataire)
+DROP VIEW IF EXISTS v_mouvements;
+CREATE VIEW v_mouvements AS
+SELECT
+    o.id_client AS id_client,
+    o.id_operation,
+    o.date_operation,
+    t.libelle AS type_operation,
+    CASE t.code WHEN 'DEPOT' THEN o.montant ELSE -(o.montant + o.frais) END AS montant_mouvement
+FROM v_operations_frais o 
+JOIN types_operation t ON t.id_type_operation = o.id_type_operation
+
+UNION ALL
+
+SELECT
+    o.id_client_destinataire AS id_client,
+    o.id_operation,
+    o.date_operation,
+    'Transfert recu' AS type_operation,
+    o.montant AS montant_mouvement
+FROM v_operations_frais o
+WHERE o.id_client_destinataire IS NOT NULL;
+
+-- Solde de chaque client, 100% calcule depuis 'operations'
+DROP VIEW IF EXISTS v_solde_clients;
+CREATE VIEW v_solde_clients AS
+SELECT
+    c.id_client,
+    c.numero_telephone,
+    COALESCE(SUM(m.montant_mouvement), 0) AS solde
+FROM clients c 
+LEFT JOIN v_mouvements m ON m.id_client = c.id_client
+GROUP BY c.id_client, c.numero_telephone;
+
+-- Historique par client avec solde courant apres chaque operation
+-- (calcule via somme cumulative, aucune valeur stockee)
+DROP VIEW IF EXISTS v_historique_client;
+CREATE VIEW v_historique_client AS
+SELECT
+    m.id_client,
+    m.id_operation,
+    m.date_operation,
+    m.type_operation,
+    m.montant_mouvement,
+    SUM(m.montant_mouvement) OVER (
+        PARTITION BY m.id_client
+        ORDER BY m.date_operation, m.id_operation
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS solde_apres
+FROM v_mouvements m;
+
+-- Gains de l'operateur via les frais (retrait et transfert)
+DROP VIEW IF EXISTS v_gains_operateur;
+CREATE VIEW v_gains_operateur AS
+SELECT
+    t.code AS type_operation,
+    COUNT(o.id_operation) AS nombre_operations,
+    SUM(o.frais) AS total_frais
+FROM v_operations_frais o
+JOIN types_operation t ON t.id_type_operation = o.id_type_operation
+WHERE t.frais_applicable = 1
+GROUP BY t.code;
