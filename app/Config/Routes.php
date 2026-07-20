@@ -12,3 +12,8 @@ $routes->post('/login', 'AuthController::login');
 $routes->get('/logout', 'AuthController::logout');
 
 $routes->get('/client/dashboard', 'ClientController::dashboard');
+
+$routes->get('/depot', 'OperationController::depot');
+$routes->post('/depot/save', 'OperationController::saveDepot');
+$routes->get('/retrait', 'OperationController::retrait');
+$routes->post('/retrait/save', 'OperationController::saveRetrait');

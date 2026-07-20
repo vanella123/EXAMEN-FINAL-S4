@@ -1,48 +1,51 @@
 <?php
+
 namespace App\Controllers;
 
-use App\Models\ClientModel;
-use CodeIgniter\RESTful\ResourceController;
+use CodeIgniter\Controller;
+use CodeIgniter\Database\Config;
 
-class ClientController extends ResourceController {
-    
-    // Créer un nouveau client
-    public function creer() {
-        $model = new ClientModel();
-        $donnees = $this->request->getJSON(true);
+class ClientController extends BaseController
+{
+    protected $db;
 
-        if (!$this->validate(['numero_telephone' => 'required|is_unique[clients.numero_telephone]'])) {
-            return $this->failValidationErrors($this->validator->getErrors());
-        }
-
-        $model->insert(['numero_telephone' => $donnees['numero_telephone']]);
-        return $this->respondCreated(['message' => 'Client créé avec succès']);
+    public function __construct()
+    {
+        $this->db = Config::connect();
     }
 
-    // Récupérer le solde depuis la vue v_solde_clients
-    public function obtenirSolde($id = null) {
-        $db = \Config\Database::connect();
-        
-        $builder = $db->table('v_solde_clients');
-        $client = $builder->where('id_client', $id)->get()->getRowArray();
-
-        if (!$client) {
-            return $this->failNotFound('Client introuvable');
+    /**
+     * Tableau de bord du client
+     */
+    public function dashboard()
+    {
+        // Vérifier que le client est connecté
+        if (!session()->get('connecte')) {
+            return redirect()->to('/login');
         }
 
-        return $this->respond($client);
-    }
+        $idClient = session()->get('id_client');
 
-    // Récupérer l'historique complet depuis la vue v_historique_client
-    public function obtenirHistorique($id = null) {
-        $db = \Config\Database::connect();
-        
-        $builder = $db->table('v_historique_client');
-        $historique = $builder->where('id_client', $id)
-                              ->orderBy('date_operation', 'DESC')
-                              ->get()
-                              ->getResultArray();
+        // Récupérer le solde du client
+        $solde = $this->db->table('v_solde_clients')
+            ->where('id_client', $idClient)
+            ->get()
+            ->getRowArray();
 
-        return $this->respond($historique);
+        // Les 10 dernières opérations
+        $historique = $this->db->table('v_historique_client')
+            ->where('id_client', $idClient)
+            ->orderBy('date_operation', 'DESC')
+            ->limit(10)
+            ->get()
+            ->getResultArray();
+
+        $data = [
+            'numero' => session()->get('numero'),
+            'solde' => $solde['solde'] ?? 0,
+            'historique' => $historique
+        ];
+
+        return view('client/dashboard', $data);
     }
 }
