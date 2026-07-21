@@ -318,3 +318,8 @@ JOIN types_operation t ON t.id_type_operation = o.id_type_operation
 WHERE t.frais_applicable = 1
 GROUP BY t.code;
 
+create table promotion (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pourcentage INTEGER
+); 
+insert into promotion (pourcentage) values (10) ; 
