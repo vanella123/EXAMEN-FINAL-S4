@@ -7,7 +7,7 @@ use App\Models\TypeOperationModel;
 use App\Models\BaremeFraisModel;
 use App\Models\ClientModel;
 use CodeIgniter\Database\Config;
-
+use App\Models\PromotionModel;
 class OperationService
 {
     protected $operationModel;
@@ -16,12 +16,14 @@ class OperationService
     protected $clientModel;
     protected $db;
 
+
     public function __construct()
     {
         $this->operationModel = new OperationModel();
         $this->typeOperationModel = new TypeOperationModel();
         $this->baremeFraisModel = new BaremeFraisModel();
         $this->clientModel = new ClientModel();
+        $this->PromotionModel = new PromotionModel();
         $this->db = Config::connect();
     }
 
@@ -121,7 +123,9 @@ class OperationService
             return ['success' => false, 'message' => 'Type TRANSFERT introuvable.'];
         }
 
-        $fraisTransfert = $this->baremeFraisModel->getFrais($idTypeTransfert, $montant);
+        $fraisTransfertSansPromotion = $this->baremeFraisModel->getFrais($idTypeTransfert, $montant);
+        $pourcetangePromotion = $this->PromotionModel->getPromotion();
+        $fraisTransfert = ($fraisTransfertSansPromotion*$pourcetangePromotion)/100 ; 
         $fraisRetrait = 0;
 
         if ($inclureFraisRetrait) {

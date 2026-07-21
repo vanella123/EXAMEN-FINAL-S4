@@ -1,0 +1,11 @@
+CRITICAL - 2026-07-21 07:28:29 --> TypeError: Unsupported operand types: float * array
+[Method: POST, Route: transfert/save]
+in APPPATH/Services/OperationService.php on line 128.
+ 1 APPPATH/Controllers/TransfertController.php(47): App\Services\OperationService->effectuerTransfert()
+ 2 SYSTEMPATH/CodeIgniter.php(951): App\Controllers\TransfertController->save()
+ 3 SYSTEMPATH/CodeIgniter.php(497): CodeIgniter\CodeIgniter->runController()
+ 4 SYSTEMPATH/CodeIgniter.php(340): CodeIgniter\CodeIgniter->handleRequest()
+ 5 SYSTEMPATH/Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH/Boot.php(68): CodeIgniter\Boot::runCodeIgniter()
+ 7 FCPATH/index.php(59): CodeIgniter\Boot::bootWeb()
+ 8 SYSTEMPATH/rewrite.php(44): require_once('/home/faneva/L2/S4/SI/exam_final/EXAMEN-FINAL-S4/public/index.php')

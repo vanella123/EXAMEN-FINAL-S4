@@ -20,6 +20,9 @@ DROP TABLE IF EXISTS clients;
 DROP TABLE IF EXISTS types_operation;
 DROP TABLE IF EXISTS administrateurs;
 DROP TABLE IF EXISTS prefixes;
+DROP TABLE IF EXISTS pourcentage_epargne;
+DROP TABLE IF EXISTS historique_epargne;
+DROP TABLE IF EXISTS promotion;
 
 PRAGMA foreign_keys = ON;
 
@@ -318,3 +321,57 @@ JOIN types_operation t ON t.id_type_operation = o.id_type_operation
 WHERE t.frais_applicable = 1
 GROUP BY t.code;
 
+create table promotion (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pourcentage INTEGER
+); 
+insert into promotion (pourcentage) values (10) ; 
+
+
+
+-- Alea 2
+CREATE TABLE pourcentage_epargne (
+    id_pourcentage_epargne INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_client INTEGER NOT NULL,
+    pourcentage DECIMAL(5,2),
+    FOREIGN KEY(id_client) 
+    REFERENCES clients(id_client) ON DELETE CASCADE
+);
+
+CREATE TABLE historique_epargne (
+    id_historique_epargne INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_client INTEGER NOT NULL,
+    valeur_epargne DECIMAL(12,2),
+    FOREIGN KEY(id_client) 
+    REFERENCES clients(id_client) ON DELETE CASCADE
+);
+
+DROP TRIGGER IF EXISTS trg_historique_epargne_update;
+CREATE TRIGGER trg_historique_epargne_update
+BEFORE UPDATE ON operations
+BEGIN
+    INSERT INTO historique_epargne
+        (id_client,valeur_epargne)
+    VALUES
+        (OLD.id_bareme, OLD.id_client, OLD.montant);
+END;
+
+-- -- 7. OPERATIONS
+-- DROP TABLE IF EXISTS operations;
+-- CREATE TABLE operations (
+--     id_operation           INTEGER PRIMARY KEY AUTOINCREMENT,
+--     id_client               INTEGER NOT NULL,           -- client qui initie l'operation
+--     id_client_destinataire  INTEGER,                    -- rempli uniquement pour un transfert
+--     id_type_operation       INTEGER NOT NULL,
+--     montant                 DECIMAL(12,2) NOT NULL,
+--     date_operation           DATETIME NOT NULL DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f','now')),
+--     FOREIGN KEY (id_client) REFERENCES clients(id_client),
+--     FOREIGN KEY (id_client_destinataire) REFERENCES clients(id_client),
+--     FOREIGN KEY (id_type_operation) REFERENCES types_operation(id_type_operation)
+-- );
+
+-- -- INDEXES
+-- CREATE INDEX idx_operations_client ON operations(id_client);
+-- CREATE INDEX idx_operations_destinataire ON operations(id_client_destinataire);
+-- CREATE INDEX idx_operations_type ON operations(id_type_operation);
+-- CREATE INDEX idx_baremes_type ON baremes_frais(id_type_operation);

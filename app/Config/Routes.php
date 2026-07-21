@@ -70,3 +70,5 @@ $routes->get(
 );
 
 $routes->get('/admin/montants', 'MontantController::index');
+
+$routes->get('/client/pourcentage' , 'PourcentageEpargne::index');
