@@ -1,0 +1,7 @@
+git add .
+git commit -m "Votre message de commit"
+
+git tag -a v1.0 -m "Version 1.0"
+
+git push origin main
+git push origin v1.0
