@@ -27,6 +27,7 @@
           <li class="nav-item"><a class="nav-link <?= ($currentPage ?? '') === 'retrait' ? 'active' : '' ?>" href="<?= base_url('retrait') ?>"><i class="bi bi-arrow-up-circle"></i> Retrait</a></li>
           <li class="nav-item"><a class="nav-link <?= ($currentPage ?? '') === 'transfert' ? 'active' : '' ?>" href="<?= base_url('transfert') ?>"><i class="bi bi-send"></i> Transfert</a></li>
           <li class="nav-item"><a class="nav-link <?= ($currentPage ?? '') === 'historique' ? 'active' : '' ?>" href="<?= base_url('historique') ?>"><i class="bi bi-clock-history"></i> Historique</a></li>
+          <li class="nav-item"><a class="nav-link <?= ($currentPage ?? '') === 'pourcentage' ? 'active' : '' ?>" href="<?= base_url('pourcentage') ?>"><i class="bi bi-clock-history"></i> epargne</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
           <span class="phone-chip"><i class="bi bi-telephone-fill"></i> <?= esc($numero) ?></span>
